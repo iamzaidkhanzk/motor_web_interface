@@ -4,81 +4,82 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ROS Web Interface</title>
-    <!-- Include ROSLIB.js -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/RobotWebTools/roslibjs@1.0.0/dist/roslib.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #333;
-            color: white;
-            padding: 1rem;
             text-align: center;
+            margin-top: 50px;
         }
         #status {
-            color: green;
+            font-size: 20px;
             font-weight: bold;
         }
-        .container {
-            padding: 20px;
-        }
-        #ros-info {
-            background-color: #fff;
+        .status {
+            margin: 20px 0;
+            padding: 10px;
             border-radius: 5px;
-            padding: 15px;
-            margin-top: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .connected {
+            color: green;
+            background-color: #dff0d8;
+        }
+        .error {
+            color: red;
+            background-color: #f2dede;
+        }
+        .closed {
+            color: orange;
+            background-color: #fcf8e3;
+        }
+        .loading {
+            color: #f0ad4e;
         }
     </style>
 </head>
 <body>
 
-<header>
     <h1>ROS Web Interface</h1>
-    <p>ROS WebSocket Client</p>
-</header>
+    <div id="status" class="status loading">Connecting...</div>
 
-<div class="container">
-    <h2>ROS WebSocket Status: <span id="status">Connecting...</span></h2>
-    <div id="ros-info">
-        <p><strong>WebSocket Status:</strong> <span id="ws-status">Not Connected</span></p>
-    </div>
-</div>
+    <div id="ws-status"></div>
 
-<script type="text/javascript">
-    // Change this URL to your Ngrok WebSocket URL
-    var ros = new ROSLIB.Ros({
-        url: 'ws://a469-144-82-8-85.ngrok-free.app:9090' // Replace with your Ngrok URL
-    });
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1.2.0/build/roslib.min.js"></script>
+    <script type="text/javascript">
+        // Replace this URL with your Ngrok WebSocket URL
+        var ros = new ROSLIB.Ros({
+            url: 'ws://dc4a-144-82-8-85.ngrok-free.app:9090' // Use the new Ngrok WebSocket URL
+        });
+        
+        // Display a connection status message
+        function updateStatus(statusText, statusClass) {
+            document.getElementById('status').innerText = statusText;
+            document.getElementById('status').className = 'status ' + statusClass;
+        }
 
-    // Update the status on successful connection
-    ros.on('connection', function() {
-        console.log('Connected to WebSocket server.');
-        document.getElementById('ws-status').innerText = 'Connected';
-        document.getElementById('status').innerText = 'Connected';
-        document.getElementById('status').style.color = 'green';
-    });
+        // Debugging log
+        console.log("Attempting to connect to ROS WebSocket server...");
 
-    // Handle error events
-    ros.on('error', function(error) {
-        console.log('Error:', error);
-        document.getElementById('ws-status').innerText = 'Error';
-        document.getElementById('status').innerText = 'Error connecting to WebSocket';
-        document.getElementById('status').style.color = 'red';
-    });
+        // On successful connection to WebSocket
+        ros.on('connection', function() {
+            console.log('Connected to WebSocket server.');
+            updateStatus('Connected to WebSocket', 'connected');
+            document.getElementById('ws-status').innerText = 'Connection Status: Connected';
+        });
 
-    // Handle closure of the connection
-    ros.on('close', function() {
-        console.log('Connection closed.');
-        document.getElementById('ws-status').innerText = 'Closed';
-        document.getElementById('status').innerText = 'Connection Closed';
-        document.getElementById('status').style.color = 'orange';
-    });
-</script>
+        // On error connecting to WebSocket
+        ros.on('error', function(error) {
+            console.log('Error:', error);
+            updateStatus('Error connecting to WebSocket', 'error');
+            document.getElementById('ws-status').innerText = 'Connection Status: Error';
+        });
+
+        // When WebSocket connection is closed
+        ros.on('close', function() {
+            console.log('Connection closed.');
+            updateStatus('Connection closed', 'closed');
+            document.getElementById('ws-status').innerText = 'Connection Status: Closed';
+        });
+    </script>
 
 </body>
 </html>
