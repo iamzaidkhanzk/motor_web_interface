@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Start Motor</title>
+  <script src="https://cdn.jsdelivr.net/npm/roslib@1.3.0/build/roslib.min.js"></script>
+  <style>
+    body { text-align: center; font-family: Arial, sans-serif; padding: 20px; }
+    button { font-size: 20px; padding: 10px 20px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Start the Motor</h1>
+  <button onclick="startMotor()">Start Motor</button>
+
+  <script>
+    const ros = new ROSLIB.Ros({
+      url: 'ws://localhost:9090'  // This will connect to your ROS WebSocket
+    });
+
+    ros.on('connection', function () {
+      console.log('Connected to rosbridge');
+    });
+
+    ros.on('error', function (error) {
+      console.log('Error connecting to rosbridge:', error);
+    });
+
+    ros.on('close', function () {
+      console.log('Connection to rosbridge closed.');
+    });
+
+    function startMotor() {
+      const pub = new ROSLIB.Topic({
+        ros: ros,
+        name: '/motor_start',
+        messageType: 'std_msgs/Bool'
+      });
+
+      const msg = new ROSLIB.Message({ data: true });
+      pub.publish(msg);
+      console.log('Motor Start Command Sent');
+    }
+  </script>
+</body>
+</html>
+
